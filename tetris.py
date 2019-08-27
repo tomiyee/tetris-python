@@ -40,7 +40,10 @@
 # THE SOFTWARE.
 
 import random
-from random import randrange as rand
+#from random import randrange as rand
+from numpy.random import randint as rand
+import numpy as np
+np.random.seed(69)
 import pygame, sys
 import ai_rando
 
@@ -371,6 +374,5 @@ def dummy_ai (current_piece, next_piece, score, ):
 
 if __name__ == '__main__':
     model = ai_rando.Model()
-    random.seed(69)
     App = TetrisApp()
     App.run()
