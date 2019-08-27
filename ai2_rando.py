@@ -1,38 +1,30 @@
 # DO NOT use numpy's random number generator, use this one instead
 # Generates a random number from [0, n)
-import random
-
-
-
+from random import randrange as rand
+from random import seed
+# Feel free to change the seed as you see fit
+seed(420)
 
 class Model:
     def __init__ (self):
         # Have your own "Global" Variables here
         pass
 
-    def next_move (self, return_object):
+    def next_move (self):
         """
-        Mutate the return_object.value int to be a value 0-5
-        The next_move function will be killed by the main thread after self.time milliseconds has passed
-        If the return_object.value is not mutated by then, no input will be recognized by the tetris emulator
+        Returns a int, or None if no button is going to be pressed
 
+        ret
         Controls:
-        0: No input
-        1: Rotates Counter-Clockwise
-        2: Drop by one row immediately and gain 1 point
-        3: Moves block to the left
-        4: Moves block to the right
-        5: Instant Drop
-
-        Usage:
-        return_object.value = 5
+        UP: Rotates Counter-Clockwise(?)
+        DOWN: Drop by one line immediately and gain 1 point
+        LEFT: Self-explanatory
+        RIGHT: Self-explanatory
+        RETURN: Instant Drop
         """
 
-        # Replace with your AI
-
-        return_object.value = random.randint(1,4)
-        print(return_object.value)
-        return
+        # Replace this method with your AI
+        return_value = rand(4)
 
     def get_board_width (self):
         """
@@ -104,7 +96,7 @@ class Model:
         """
         Returns an integer value of the current score
         """
-        return self.score
+        return self.score;
 
     def get_board_state (self):
         """
@@ -121,7 +113,7 @@ class Model:
         """
         Returns an integer with the number of milliseconds until your code's termination
         """
-        return self.time;
+        return self.time
 
     def update_state (self, game_state):
         """

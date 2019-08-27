@@ -41,9 +41,17 @@
 
 import random
 from numpy.random import randint as rand
-import numpy as np
-import pygame, sys
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame # silences pygame's message
+import sys
 import ai_rando
+import multiprocessing
+
+
+class TimeoutException(Exception):
+    pass
+
 
 # The configuration
 cell_size =    18
@@ -95,6 +103,7 @@ rotation_offsets = [ [(1,-1), (-1,0), (0,0), (0,1)],
                      [(0,0), (0, 0), (0,0), (0,0)]
 ]
 
+code_map = [0, "UP", "DOWN", "LEFT", "RIGHT", "RETURN"]
 def rotate_counter_clockwise(shape):
     return [ [ shape[y][x]
             for y in range(len(shape)) ]
@@ -356,11 +365,23 @@ Press space to continue""" % self.score)
                 "position": (self.stone_y, self.stone_x),
                 "current_piece_map": current_piece_map
             }
-            # I tell the model this interpretation, and have it return it's next move
+            # I tell the model this interpretation, and have it return its next move
             model.update_state(ir)
-            dir = model.next_move()
-            if dir != None:
-                key_actions[dir]()
+            return_value = multiprocessing.Value('i') # creates a ctype integer pointer
+            process = multiprocessing.Process(target = model.next_move, args = (return_value,))
+
+            process.start()
+
+            process.join(ir["allotted_time"]) # timeout amount
+            if process.is_alive():
+                process.terminate()
+
+
+
+            if return_value.value in range(6):
+                key_actions[code_map[return_value.value]]()
+            else:
+                print("the return code: ", return_value.value, " is not recognized by tetris; command ignored")
 
             # Return to normal game execution
             for event in pygame.event.get():
