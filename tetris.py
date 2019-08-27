@@ -40,10 +40,8 @@
 # THE SOFTWARE.
 
 import random
-#from random import randrange as rand
 from numpy.random import randint as rand
 import numpy as np
-np.random.seed(69)
 import pygame, sys
 import ai_rando
 
@@ -317,62 +315,29 @@ Press space to continue""" % self.score)
 						(cols+1,2))
 			pygame.display.update()
 
+			# I do some way of internal representation here
+			internal_representation = {}
 
+			# I tell the model this interpretation, and have it return it's next move
+			model.update_state(internal_representation)
 			dir = model.next_move()
-
 			key_actions[dir]()
 
+			# Return to normal game execution
 			for event in pygame.event.get():
 				if event.type == pygame.USEREVENT+1:
 					self.drop(False)
 				elif event.type == pygame.QUIT:
 					self.quit()
-
-				# elif event.type == pygame.KEYDOWN:
-				# 	for key in key_actions:
-				# 		if event.key == eval("pygame.K_"+key):
-				# 			key_actions[key]()
-
-
-
-
+				elif event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						key_actions["ESCAPE"]()
 
 			dont_burn_my_cpu.tick(maxfps)
 
-
-def get_current_piece ():
-    return 1
-
-def get_next_piece ():
-
-    return 1
-
-def get_score ():
-    """
-    returns an integer value representing your current score
-    """
-    pass
-
-def get_board_state ():
-    """
-    Will Retrun 2D grid of 0s, 1s,
-
-    0 indicates empty space
-    1 indicates a locked in piece.
-
-    current piece is not included
-    """
-    return [[]]
-
-
-
-
-def dummy_ai (current_piece, next_piece, score, ):
-
-    return 1
-
-
 if __name__ == '__main__':
-    model = ai_rando.Model()
+
+	model = ai_rando.Model()
+	np.random.seed(69)
     App = TetrisApp()
     App.run()
