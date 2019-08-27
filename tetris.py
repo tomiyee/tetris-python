@@ -288,9 +288,8 @@ class TetrisApp(object):
 
             self.stone_x += dx
             self.stone_y += dy
-            if not check_collision(self.board,
-                                   new_stone,
-                                   (self.stone_x, self.stone_y)):
+            if not check_collision(self.board, new_stone, (self.stone_x, self.stone_y)) and \
+                    10 > self.stone_x > 0 and 22 > self.stone_y > 0:
                 self.stone = new_stone
                 self.rotatation_state += 1
                 self.rotatation_state %= 4
@@ -308,6 +307,7 @@ class TetrisApp(object):
 
     def run(self):
         key_actions = {
+            0: lambda : print("No input detected"),
             'ESCAPE':    self.quit,
             'LEFT':        lambda:self.move(-1),
             'RIGHT':    lambda:self.move(+1),
@@ -360,7 +360,7 @@ Press space to continue""" % self.score)
                 "next_piece": [list(map(bool, row)) for row in self.next_stone],
                 "next_piece_id": self.next_stone_id,
                 "score": self.score,
-                "allotted_time": 200,
+                "allotted_time": 2000,
                 "current_board": [list(map(bool, row)) for row in self.board[:-1]],
                 "position": (self.stone_y, self.stone_x),
                 "current_piece_map": current_piece_map
@@ -370,10 +370,14 @@ Press space to continue""" % self.score)
             return_value = multiprocessing.Value('i') # creates a ctype integer pointer
             process = multiprocessing.Process(target = model.next_move, args = (return_value,))
 
-            process.start()
+            import time
 
-            process.join(ir["allotted_time"]) # timeout amount
+            process.start()
+            start = time.time()
+            process.join(ir["allotted_time"]/1000) # timeout amount
+            print(time.time() - start)
             if process.is_alive():
+                print("TimeoutException thrown; code execution was terminated")
                 process.terminate()
 
 
@@ -399,7 +403,9 @@ Press space to continue""" % self.score)
 if __name__ == '__main__':
     # Initialize the model
     model = ai_rando.Model()
+    from numpy.random import seed
     # Initialize the seed for the blocks
     # Let the games begin
+    seed(439)
     App = TetrisApp()
     App.run()

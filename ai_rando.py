@@ -1,7 +1,7 @@
 # DO NOT use numpy's random number generator, use this one instead
 # Generates a random number from [0, n)
 import random
-
+import time
 
 
 
@@ -30,9 +30,9 @@ class Model:
 
         # Replace with your AI
 
-        return_object.value = random.randint(1,4)
-        print(return_object.value)
-        return
+        #return_object.value = random.randint(1,4)
+
+        pass
 
     def get_board_width (self):
         """
