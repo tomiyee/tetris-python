@@ -86,7 +86,16 @@ tetris_shapes = [
      [7, 7]]
 ]
 
-def rotate_clockwise(shape):
+rotation_offsets = [ [(1,-1), (-1,0), (0,0), (0,1)],
+                     [(0,0), (0, 0), (0,0), (0,0)],
+                     [(1,0), (-1, 0), (1,0), (-1,0)],
+                     [(1,-1), (-1,0), (0,0), (0,1)],
+                     [(1,-1), (-1,0), (0,0), (0,1)],
+                     [(1,-1), (-1,1), (1,-1), (-1,1)],
+                     [(0,0), (0, 0), (0,0), (0,0)]
+]
+
+def rotate_counter_clockwise(shape):
     return [ [ shape[y][x]
             for y in range(len(shape)) ]
         for x in range(len(shape[0]) - 1, -1, -1) ]
@@ -138,12 +147,12 @@ class TetrisApp(object):
                                                      # block them.
 
         self.next_stone_id = rand(len(tetris_shapes))
-        self.stone_id = self.next_stone_id
+        
         self.next_stone = tetris_shapes[self.next_stone_id]
         self.init_game()
 
     def new_stone(self):
-
+        self.rotatation_state = 0
         self.stone_id = self.next_stone_id
         self.stone = self.next_stone[:]
         self.next_stone_id = rand(len(tetris_shapes))
@@ -263,12 +272,22 @@ class TetrisApp(object):
                 pass
 
     def rotate_stone(self):
+
         if not self.gameover and not self.paused:
-            new_stone = rotate_clockwise(self.stone)
+            new_stone = rotate_counter_clockwise(self.stone)
+            dx, dy = rotation_offsets[self.stone_id][self.rotatation_state]
+
+            self.stone_x += dx
+            self.stone_y += dy
             if not check_collision(self.board,
                                    new_stone,
                                    (self.stone_x, self.stone_y)):
                 self.stone = new_stone
+                self.rotatation_state += 1
+                self.rotatation_state %= 4
+            else:
+                self.stone_x -= dx
+                self.stone_y -= dy
 
     def toggle_pause(self):
         self.paused = not self.paused
