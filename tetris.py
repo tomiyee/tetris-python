@@ -46,7 +46,7 @@ with contextlib.redirect_stdout(None):
     import pygame # silences pygame's message
 import sys
 import ai_rando
-import multiprocessing
+import time
 
 
 class TimeoutException(Exception):
@@ -365,27 +365,30 @@ Press space to continue""" % self.score)
                 "position": (self.stone_y, self.stone_x),
                 "current_piece_map": current_piece_map
             }
-            # I tell the model this interpretation, and have it return its next move
-            model.update_state(ir)
-            return_value = multiprocessing.Value('i') # creates a ctype integer pointer
-            process = multiprocessing.Process(target = model.next_move, args = (return_value,))
 
-            import time
-
-            process.start()
             start = time.time()
-            process.join(ir["allotted_time"]/1000) # timeout amount
-            print(time.time() - start)
-            if process.is_alive():
-                print("TimeoutException thrown; code execution was terminated")
-                process.terminate()
+            return_value = model.next_move()
+            elapsed = time.time() - start
+            elapsed *= 1000
+            if elapsed  > ir["allowed time"]:
+                score = ir["allotted_time"] - elapsed
+                print("next_move() function took ", elapsed, "ms over allotted time to complete. "
+                                                             "Points were lost from score")
+                self.score += score
 
-
-
-            if return_value.value in range(6):
-                key_actions[code_map[return_value.value]]()
-            else:
-                print("the return code: ", return_value.value, " is not recognized by tetris; command ignored")
+            if type(return_value) == int:
+                return_value = list(return_value)
+            if type(return_value) == list:
+                j = []
+                for i in return_value:
+                    if j.count(i) == 1:
+                        print("Ignored repetitive keystroke: ", i)
+                        continue
+                    j.append(i)
+                    if i in range(6):
+                        key_actions[code_map[i]]()
+                    else:
+                        print("the  code: ", i, " is not recognized by tetris; command ignored")
 
             # Return to normal game execution
             for event in pygame.event.get():

@@ -10,12 +10,14 @@ class Model:
         # Have your own "Global" Variables here
         pass
 
-    def next_move (self, return_object):
+    def next_move (self):
         """
-        Mutate the return_object.value int to be a value 0-5
-        The next_move function will be killed by the main thread after self.time milliseconds has passed
-        If the return_object.value is not mutated by then, no input will be recognized by the tetris emulator
-
+        Return an array of numbers denoting moves in a given frame. The tetris program will interpret the moves to the
+        best of its ability.
+        Alternatively, return a number for a single command.
+        Simultaneous keypresses are allowed but not multiple repeated keystrokes
+        Invalid codes are ignored
+        The array is evaluated in the order it is returned
         Controls:
         0: No input
         1: Rotates Counter-Clockwise
@@ -25,14 +27,12 @@ class Model:
         5: Instant Drop
 
         Usage:
-        return_object.value = 5
+        return [2, 3, 1]
         """
 
         # Replace with your AI
 
-        #return_object.value = random.randint(1,4)
-
-        pass
+        return 0
 
     def get_board_width (self):
         """
@@ -121,7 +121,7 @@ class Model:
         """
         Returns an integer with the number of milliseconds until your code's termination
         """
-        return self.time;
+        return self.time
 
     def update_state (self, game_state):
         """
