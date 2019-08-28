@@ -370,14 +370,14 @@ Press space to continue""" % self.score)
             return_value = model.next_move()
             elapsed = time.time() - start
             elapsed *= 1000
-            if elapsed  > ir["allowed time"]:
+            if elapsed  > ir["allotted_time"]:
                 score = ir["allotted_time"] - elapsed
                 print("next_move() function took ", elapsed, "ms over allotted time to complete. "
                                                              "Points were lost from score")
                 self.score += score
 
             if type(return_value) == int:
-                return_value = list(return_value)
+                return_value = [return_value]
             if type(return_value) == list:
                 j = []
                 for i in return_value:

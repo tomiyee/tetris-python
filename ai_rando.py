@@ -32,7 +32,7 @@ class Model:
 
         # Replace with your AI
 
-        return 0
+        return random.randint(1,6)
 
     def get_board_width (self):
         """
