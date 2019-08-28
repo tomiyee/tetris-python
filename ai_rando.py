@@ -15,9 +15,13 @@ class Model:
         Return an array of numbers denoting moves in a given frame. The tetris program will interpret the moves to the
         best of its ability.
         Alternatively, return a number for a single command.
-        Simultaneous keypresses are allowed but not multiple repeated keystrokes
+        Simultaneous key presses are allowed but not multiple repeated key presses
         Invalid codes are ignored
         The array is evaluated in the order it is returned
+
+        If next_move() takes more milliseconds than provided by game_state["allotted_time"] the game will
+        compensate by skipping frames
+
         Controls:
         0: No input
         1: Rotates Counter-Clockwise
@@ -32,7 +36,7 @@ class Model:
 
         # Replace with your AI
 
-        return random.randint(1,6)
+        return random.randint(1,4)
 
     def get_board_width (self):
         """

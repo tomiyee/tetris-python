@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ed5c9c81-c2dd-4fb8-a9aa-16bf9184119b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ai_rando.py" beforeDir="false" afterPath="$PROJECT_DIR$/ai_rando.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tetris.py" beforeDir="false" afterPath="$PROJECT_DIR$/tetris.py" afterDir="false" />
     </list>

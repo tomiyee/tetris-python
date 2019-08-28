@@ -47,7 +47,7 @@ with contextlib.redirect_stdout(None):
 import sys
 import ai_rando
 import time
-
+from math import ceil
 
 class TimeoutException(Exception):
     pass
@@ -128,7 +128,7 @@ def join_matrixes(mat1, mat2, mat2_off):
     off_x, off_y = mat2_off
     for cy, row in enumerate(mat2):
         for cx, val in enumerate(row):
-            mat1[cy+off_y-1    ][cx+off_x] += val
+            mat1[cy+off_y-1][cx+off_x] += val
     return mat1
 
 def new_board():
@@ -140,6 +140,10 @@ def new_board():
 class TetrisApp(object):
     def __init__(self):
         pygame.init()
+        self.allotted_time = 200
+        self.overtime = 0
+        self.queued_commands = []
+        self.total_game_ticks = 0
         pygame.key.set_repeat(250,25)
         self.width = cell_size*(cols+6)
         self.height = cell_size*rows
@@ -306,17 +310,7 @@ class TetrisApp(object):
             self.gameover = False
 
     def run(self):
-        key_actions = {
-            0: lambda : print("No input detected"),
-            'ESCAPE':    self.quit,
-            'LEFT':        lambda:self.move(-1),
-            'RIGHT':    lambda:self.move(+1),
-            'DOWN':        lambda:self.drop(True),
-            'UP':        self.rotate_stone,
-            'p':        self.toggle_pause,
-            'SPACE':    self.start_game,
-            'RETURN':    self.insta_drop
-        }
+
 
         self.gameover = False
         self.paused = False
@@ -348,60 +342,93 @@ Press space to continue""" % self.score)
                     self.draw_matrix(self.next_stone,
                         (cols+1,2))
             pygame.display.update()
+            if not self.gameover:
+                self.total_game_ticks += 1
 
-            # I do some way of internal representation here
-            current_piece_map = [[False for c in r] for r in self.board[:-1]]
-            for r in range(len(self.stone)):
-                for c in range(len(self.stone[r])):
-                    current_piece_map[r+self.stone_y][c+self.stone_x] = bool(self.stone[r][c])
-            ir = {
-                "current_piece": [list(map(bool, row)) for row in self.stone],
-                "current_piece_id": self.stone_id,
-                "next_piece": [list(map(bool, row)) for row in self.next_stone],
-                "next_piece_id": self.next_stone_id,
-                "score": self.score,
-                "allotted_time": 2000,
-                "current_board": [list(map(bool, row)) for row in self.board[:-1]],
-                "position": (self.stone_y, self.stone_x),
-                "current_piece_map": current_piece_map
-            }
+                if self.total_game_ticks % 100 == 0:
+                    self.allotted_time -= 5
 
-            start = time.time()
-            return_value = model.next_move()
-            elapsed = time.time() - start
-            elapsed *= 1000
-            if elapsed  > ir["allotted_time"]:
-                score = ir["allotted_time"] - elapsed
-                print("next_move() function took ", elapsed, "ms over allotted time to complete. "
-                                                             "Points were lost from score")
-                self.score += score
+                if self.overtime > 0: # if the code was timed out
+                    self.overtime = max(0, self.overtime - self.allotted_time)
+                    if self.total_game_ticks % 5 == 0:
+                        self.drop(False)
+                    if self.overtime == 0:
+                        self.interpret(self.queued_commands)
+                        self.queued_commands = []
+                else:
 
-            if type(return_value) == int:
-                return_value = [return_value]
-            if type(return_value) == list:
-                j = []
-                for i in return_value:
-                    if j.count(i) == 1:
-                        print("Ignored repetitive keystroke: ", i)
-                        continue
-                    j.append(i)
-                    if i in range(6):
-                        key_actions[code_map[i]]()
+
+                    # I do some way of internal representation here
+                    current_piece_map = [[False for c in r] for r in self.board[:-1]]
+                    for r in range(len(self.stone)):
+                        for c in range(len(self.stone[r])):
+                            current_piece_map[r+self.stone_y][c+self.stone_x] = bool(self.stone[r][c])
+                    ir = {
+                        "current_piece": [list(map(bool, row)) for row in self.stone],
+                        "current_piece_id": self.stone_id,
+                        "next_piece": [list(map(bool, row)) for row in self.next_stone],
+                        "next_piece_id": self.next_stone_id,
+                        "score": self.score,
+                        "allotted_time": self.allotted_time,
+                        "current_board": [list(map(bool, row)) for row in self.board[:-1]],
+                        "position": (self.stone_y, self.stone_x),
+                        "current_piece_map": current_piece_map
+                    }
+
+                    start = time.time()
+                    return_value = model.next_move()
+                    elapsed = time.time() - start
+                    elapsed *= 1000
+
+                    if elapsed  > self.allotted_time:
+                        self.overtime += elapsed - self.allotted_time
+                        print("next_move() function took ", ceil(elapsed - ir["allotted_time"]), "ms over allotted time to complete. "
+                                                                     "game simulated ahead to compensate")
+                        self.queued_commands = return_value
                     else:
-                        print("the  code: ", i, " is not recognized by tetris; command ignored")
+                        self.interpret(return_value)
+
 
             # Return to normal game execution
             for event in pygame.event.get():
-                if event.type == pygame.USEREVENT+1:
-                    self.drop(False)
-                elif event.type == pygame.QUIT:
+                #if event.type == pygame.USEREVENT+1:
+                #    self.drop(False)
+                if event.type == pygame.QUIT:
                     self.quit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        key_actions["ESCAPE"]()
+                        self.quit()
+            if self.total_game_ticks % 5 == 0:
+                self.drop(False)
 
             dont_burn_my_cpu.tick(maxfps)
 
+    def interpret(self, return_value):  # takes a list of commands and interprets them as game movements
+        key_actions = {
+            0: lambda: print("No input detected"),
+            'ESCAPE': self.quit,
+            'LEFT': lambda: self.move(-1),
+            'RIGHT': lambda: self.move(+1),
+            'DOWN': lambda: self.drop(True),
+            'UP': self.rotate_stone,
+            'p': self.toggle_pause,
+            'SPACE': self.start_game,
+            'RETURN': self.insta_drop
+        }
+
+        if type(return_value) == int:
+            return_value = [return_value]
+        if type(return_value) == list:
+            j = []
+            for i in return_value:
+                if j.count(i) == 1:
+                    print("Ignored repetitive keystroke: ", i)
+                    continue
+                j.append(i)
+                if i in range(6):
+                    key_actions[code_map[i]]()
+                else:
+                    print("the  code: ", i, " is not recognized by tetris; command ignored")
 
 if __name__ == '__main__':
     # Initialize the model
