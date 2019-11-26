@@ -160,7 +160,7 @@ class TetrisApp(object):
                                                      # block them.
 
         self.next_stone_id = rand(len(tetris_shapes))
-        
+
         self.next_stone = tetris_shapes[self.next_stone_id]
         self.init_game()
 
@@ -374,6 +374,8 @@ Press space to continue""" % self.score)
                         "position": (self.stone_y, self.stone_x),
                         "current_piece_map": current_piece_map
                     }
+
+                    model.update_state(ir)
 
                     start = time.time()
                     return_value = model.next_move()
