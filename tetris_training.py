@@ -66,6 +66,7 @@ rows = 22
 input_size = cols * rows
 output_size = 6
 
+episode_update = 10
 
 
 class TimeoutException(Exception):
@@ -467,6 +468,7 @@ Press space to continue""" % self.score)
 class Model:
     def __init__ (self, resume=False, load_file_name="save.p"):
         self.stop = False
+        self.avg_scores = [0]*episode_update
         # Have your own "Global" Variables here
         self.score = 0
         self.num_ticks = 0
@@ -479,8 +481,7 @@ class Model:
 
         if resume:
             self.model = pickle.load(open(load_file_name, 'rb'))
-            print("Loading")
-            print(self.model)
+            print("Loading ... ")
         else:
             # We start initializing manually
             self.model = {}
@@ -535,6 +536,9 @@ class Model:
     def finish_episode (self):
         self.rewards.append(0)
 
+        self.avg_scores = self.avg_scores[1:] + [self.score]
+        avg_score = np.mean(self.avg_scores)
+
         self.num_episodes += 1
         # This Episode's Data gets saved
         self.ep_game_states = np.vstack(self.game_states)       # Observations
@@ -563,6 +567,10 @@ class Model:
             # Reset the Gradient buffer to accumulate again next batch
             self.grad_buffer = { k : np.zeros_like(v) for k,v in self.model.items() }
 
+        if self.num_episodes % episode_update == 0:
+            print("Finished Episode ", self.num_episodes)
+            print("  Avg of last", episode_update, "games is", avg_score)
+
         # Clean Up After Yourself
         self.score = 0
         self.num_ticks = 0
@@ -573,7 +581,6 @@ class Model:
 
     def save (self, file_name="save.p"):
         pickle.dump(self.model, open(file_name, 'wb'))
-        print("Saving")
 
     def next_move (self):
         """
