@@ -518,17 +518,20 @@ class Model:
     def policy_backward (self, eph, epdlogp):
         # We will recursively compute the chainrule
         # eph is an array of the intermediate hidden state
-        dw2 = np.dot(eph.T, epdlogp).ravel()
-        dh = np.outer(epdlogp, self.model['w2'])
-        print(eph.shape)
-        print(dh.shape)
+        dw2 = np.dot(eph.T, epdlogp).T
+
+        dh = np.dot(self.model['w2'].T, epdlogp.T).T
+
         # Apply Relu
         dh[eph <= 0] = 0
 
-        dw1 = np.dot(dh.T, self.ep_game_states)
+        dw1 = np.dot(self.ep_game_states.T, dh).T
+
         return {'w1': dw1, 'w2': dw2}
 
     def finish_episode (self):
+        self.rewards.append(0)
+
         self.num_episodes += 1
         # This Episode's Data gets saved
         self.ep_game_states = np.vstack(self.game_states)       # Observations
@@ -543,9 +546,7 @@ class Model:
         discounted_epr -= np.mean(discounted_epr)
         discounted_epr /= np.std(discounted_epr)
 
-        ep_dlogps != discounted_epr
-        print(ep_hidden_states.shape)
-        print(ep_dlogps.shape)
+        ep_dlogps *= discounted_epr
         grad = self.policy_backward(ep_hidden_states, ep_dlogps)
 
         # Save this episode's gradients so that we apply at the end of the batch in bulk
@@ -605,7 +606,7 @@ class Model:
         output, hidden_state = self.policy_forward(curr_state.ravel())
         # Save the game state and hidden states so that we can do back prop later
         self.hidden_states.append(hidden_state)
-        self.game_states.append(curr_state)
+        self.game_states.append(curr_state.ravel())
 
         # Make a decision
         pr = np.random.uniform()
@@ -744,6 +745,6 @@ if __name__ == '__main__':
     while True:
         model = Model()
         TetrisApp().run()
+        model.finish_episode()
         if model.stop:
             break
-        #model.finish_episode()
