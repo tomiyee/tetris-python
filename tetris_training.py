@@ -50,11 +50,12 @@ import sys
 import ai_rando
 import time
 from math import ceil
+import os
 
 import pickle
 # Hyperparameters
 hidden = 200
-batch_size = 10
+batch_size = 5
 learning_rate = 1e-4
 gamma = 0.99 # This is the discount factor
 decay_rate = 0.99
@@ -428,6 +429,7 @@ Press space to continue""" % self.score)
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.quit()
+                        model.stop = True
                         # FOR TRAINING PURPOSES
                         return
             if self.total_game_ticks % 5 == 0:
@@ -477,6 +479,8 @@ class Model:
 
         if resume:
             self.model = pickle.load(open(load_file_name, 'rb'))
+            print("Loading")
+            print(self.model)
         else:
             # We start initializing manually
             self.model = {}
@@ -552,7 +556,7 @@ class Model:
         for k in self.model: self.grad_buffer[k] += grad[k]
 
         if self.num_episodes % batch_size == 0:
-            for k,v in self.mode.items():
+            for k,v in self.model.items():
                 g = self.grad_buffer[k]
                 self.rmsprop_cache[k] = decay_rate * self.rmsprop_cache[k] + (1 - decay_rate) * g**2
                 self.model[k] += learning_rate * g / (np.sqrt(self.rmsprop_cache[k]) + 1e-5)
@@ -569,6 +573,7 @@ class Model:
 
     def save (self, file_name="save.p"):
         pickle.dump(self.model, open(file_name, 'wb'))
+        print("Saving")
 
     def next_move (self):
         """
@@ -746,9 +751,9 @@ if __name__ == '__main__':
     seed(439)
 
     save_file_name = "save.p"
+    model = Model(True, save_file_name)
 
     while True:
-        model = Model(True, save_file_name)
         TetrisApp().run()
         model.finish_episode()
         if model.stop:
