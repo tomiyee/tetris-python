@@ -1,9 +1,11 @@
 # DO NOT use numpy's random number generator, use this one instead
 # Generates a random number from [0, n)
+from random import randrange as rand
+from random import seed
 import random
 import time
-
-
+# Feel free to change the seed as you see fit
+seed(420)
 
 class Model:
     def __init__ (self):
