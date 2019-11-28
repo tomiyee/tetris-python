@@ -51,7 +51,7 @@ import ai_rando
 import time
 from math import ceil
 
-
+import pickle
 # Hyperparameters
 hidden = 200
 batch_size = 10
@@ -463,7 +463,7 @@ Press space to continue""" % self.score)
                     print("the  code: ", i, " is not recognized by tetris; command ignored")
 
 class Model:
-    def __init__ (self, resume=False):
+    def __init__ (self, resume=False, load_file_name="save.p"):
         self.stop = False
         # Have your own "Global" Variables here
         self.score = 0
@@ -476,9 +476,8 @@ class Model:
         self.model = None
 
         if resume:
-            self.model = pickle.load(open('save.p', 'rb'))
+            self.model = pickle.load(open(load_file_name, 'rb'))
         else:
-
             # We start initializing manually
             self.model = {}
             # We will use xavier initialization to pseudo-randomly initialize the weights
@@ -567,6 +566,9 @@ class Model:
         self.game_states = []
         self.hidden_states = []
         self.dlogps = []
+
+    def save (self, file_name="save.p"):
+        pickle.dump(self.model, open(file_name, 'wb'))
 
     def next_move (self):
         """
@@ -742,9 +744,13 @@ if __name__ == '__main__':
     # Initialize the seed for the blocks
     # Let the games begin
     seed(439)
+
+    save_file_name = "save.p"
+
     while True:
-        model = Model()
+        model = Model(True, save_file_name)
         TetrisApp().run()
         model.finish_episode()
         if model.stop:
             break
+        model.save(save_file_name)
