@@ -121,7 +121,7 @@ class Model:
 
         current piece is not included
         """
-        self.board
+        return self.board
 
     def get_allotted_time (self):
         """
@@ -142,5 +142,5 @@ class Model:
         self.time = game_state["allotted_time"]
         self.board = game_state["current_board"]
         self.coord = game_state["position"]
-        self.currrent_piece_map = game_state["current_piece_map"]
+        self.current_piece_map = game_state["current_piece_map"]
         pass
