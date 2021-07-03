@@ -360,9 +360,9 @@ class TetrisApp(object):
                         self.interpret(self.queued_commands)
                         self.queued_commands = []
                 else:
-                    internal_state_representation = self._build_state_representation()
+                    state_representation = self._build_state_representation()
 
-                    model._update_state(internal_state_representation)
+                    model._update_state(state_representation)
 
                     start = time.time()
                     return_value = model.next_move()
@@ -412,7 +412,7 @@ class TetrisApp(object):
         if type(bot_inputs) == int:
             bot_inputs = [bot_inputs]
 
-        if type(bot_inputs) !== list:
+        if type(bot_inputs) != list:
             return;
 
         prev_inputs = set()
@@ -422,7 +422,7 @@ class TetrisApp(object):
                 continue
             prev_inputs.add(i)
 
-            key_action = code_map.get(i, None)
+            key_action = code_map[i] if i in range(len(code_map)) else None
             if key_action is None:
                 print(f'The code: {i} is not recognized by tetris, command ignored.')
                 continue
@@ -453,7 +453,7 @@ class TetrisApp(object):
             "current_piece_map": current_piece_map,
         }
 
-        return state_representaiton
+        return state_representation
 
 if __name__ == "__main__":
 
