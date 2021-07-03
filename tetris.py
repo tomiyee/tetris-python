@@ -367,30 +367,9 @@ class TetrisApp(object):
                         self.interpret(self.queued_commands)
                         self.queued_commands = []
                 else:
+                    state_representation = self._build_state_representation()
 
-                    # I do some way of internal representation here
-                    current_piece_map = [[False for c in r] for r in self.board[:-1]]
-                    for r in range(len(self.stone)):
-                        for c in range(len(self.stone[r])):
-                            current_piece_map[r + self.stone_y][
-                                c + self.stone_x
-                            ] = bool(self.stone[r][c])
-                    # Builds the Internal Representation
-                    internal_state_representation = {
-                        "current_piece": [list(map(bool, row)) for row in self.stone],
-                        "current_piece_id": self.stone_id,
-                        "next_piece": [list(map(bool, row)) for row in self.next_stone],
-                        "next_piece_id": self.next_stone_id,
-                        "score": self.score,
-                        "allotted_time": self.allotted_time,
-                        "current_board": [
-                            list(map(bool, row)) for row in self.board[:-1]
-                        ],
-                        "position": (self.stone_y, self.stone_x),
-                        "current_piece_map": current_piece_map,
-                    }
-
-                    self.model._update_state(internal_state_representation)
+                    self.model._update_state(state_representation)
 
                     start = time.time()
                     return_value = self.model.next_move()
@@ -405,7 +384,7 @@ class TetrisApp(object):
                         self.overtime += elapsed - self.allotted_time
                         print(
                             "next_move() function took ",
-                            ceil(elapsed - internal_state_representation["allotted_time"]),
+                            ceil(elapsed - state_representation["allotted_time"]),
                             "ms over allotted time to complete. "
                             "game simulated ahead to compensate",
                         )
@@ -427,7 +406,7 @@ class TetrisApp(object):
 
             dont_burn_my_cpu.tick(maxfps)
 
-    def interpret(self, return_value):
+    def interpret(self, bot_inputs):
         # takes a list of commands and interprets them as game movements
         key_actions = {
             0: lambda: 0,
@@ -441,22 +420,51 @@ class TetrisApp(object):
             "RETURN": self.insta_drop,
         }
 
-        if type(return_value) == int:
-            return_value = [return_value]
-        if type(return_value) == list:
-            prev_inputs = set()
-            for i in return_value:
-                if i in prev_inputs:
-                    print("Ignored repetitive keystroke: ", i)
-                    continue
-                prev_inputs.add(i)
+        if type(bot_inputs) == int:
+            bot_inputs = [bot_inputs]
 
-                key_action = code_map.get(i, None)
-                if key_action is None:
-                    print(f'The code: {i} is not recognized by tetris, command ignored.')
-                    continue
-                key_actions[key_action]()
+        if type(bot_inputs) != list:
+            return;
 
+        prev_inputs = set()
+        for i in bot_inputs:
+            if i in prev_inputs:
+                print("Ignored repetitive keystroke: ", i)
+                continue
+            prev_inputs.add(i)
+
+            key_action = code_map[i] if i in range(len(code_map)) else None
+            if key_action is None:
+                print(f'The code: {i} is not recognized by tetris, command ignored.')
+                continue
+            key_actions[key_action]()
+    def _build_state_representation(self):
+        """
+        Constructs a dict containing properties of the current game state to send
+        to the model.
+        """
+
+        # I do some way of internal representation here
+        current_piece_map = [[False for c in r] for r in self.board[:-1]]
+        for r in range(len(self.stone)):
+            for c in range(len(self.stone[r])):
+                current_piece_map[r + self.stone_y][c + self.stone_x] = bool(self.stone[r][c])
+        # Builds the Internal Representation
+        state_representation = {
+            "current_piece": [list(map(bool, row)) for row in self.stone],
+            "current_piece_id": self.stone_id,
+            "next_piece": [list(map(bool, row)) for row in self.next_stone],
+            "next_piece_id": self.next_stone_id,
+            "score": self.score,
+            "allotted_time": self.allotted_time,
+            "current_board": [
+                list(map(bool, row)) for row in self.board[:-1]
+            ],
+            "position": (self.stone_y, self.stone_x),
+            "current_piece_map": current_piece_map,
+        }
+
+        return state_representation
 
 if __name__ == "__main__":
 
