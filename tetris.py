@@ -3,7 +3,7 @@
 
 # NOTE FOR WINDOWS USERS:
 # You can download a "exefied" version of this game at:
-# http://hi-im.laria.me/progs/tetris_py_exefied.zip
+# http://hi-im.laria.me/progs/tetris_py_exefied.zipp
 # If a DLL is missing or something like this, write an E-Mail (me@laria.me)
 # or leave a comment on this gist.
 
@@ -41,23 +41,25 @@
 
 import random
 from numpy.random import randint as rand
+from numpy.random import seed
 import contextlib
 with contextlib.redirect_stdout(None):
     import pygame # silences pygame's message
 import sys
-import ai_rando
 import time
 from math import ceil
+from argparse import ArgumentParser
+import importlib
 
 class TimeoutException(Exception):
+    """ A custom exception for when a model takes too long to make a decision """
     pass
 
-
 # The configuration
-cell_size =    18
-cols =        10
-rows =        22
-maxfps =     30
+cell_size = 18
+cols =      10
+rows =      22
+maxfps =    30
 
 colors = [
 (0,   0,   0  ),
@@ -108,6 +110,10 @@ def rotate_counter_clockwise(shape):
     return [ [ shape[y][x]
             for y in range(len(shape)) ]
         for x in range(len(shape[0]) - 1, -1, -1) ]
+
+def rotate_clockwise(shape):
+    """ Given a shape, rotates it counter clockwise """
+    raise NotImplementedError()
 
 def check_collision(board, shape, offset):
     off_x, off_y = offset
@@ -357,13 +363,13 @@ Press space to continue""" % self.score)
                         self.queued_commands = []
                 else:
 
-
                     # I do some way of internal representation here
                     current_piece_map = [[False for c in r] for r in self.board[:-1]]
                     for r in range(len(self.stone)):
                         for c in range(len(self.stone[r])):
                             current_piece_map[r+self.stone_y][c+self.stone_x] = bool(self.stone[r][c])
-                    ir = {
+                    # Builds the Internal Representation
+                    internal_state_representation = {
                         "current_piece": [list(map(bool, row)) for row in self.stone],
                         "current_piece_id": self.stone_id,
                         "next_piece": [list(map(bool, row)) for row in self.next_stone],
@@ -375,7 +381,7 @@ Press space to continue""" % self.score)
                         "current_piece_map": current_piece_map
                     }
 
-                    model.update_state(ir)
+                    model.update_state(internal_state_representation)
 
                     start = time.time()
                     return_value = model.next_move()
@@ -433,11 +439,20 @@ Press space to continue""" % self.score)
                     print("the  code: ", i, " is not recognized by tetris; command ignored")
 
 if __name__ == '__main__':
-    # Initialize the model
-    model = ai_rando.Model()
-    from numpy.random import seed
+
     # Initialize the seed for the blocks
-    # Let the games begin
     seed(439)
+
+    # Parse the Arguments
+    parser = ArgumentParser()
+    parser.add_argument('-m', '--model', dest='file_name')
+    args = parser.parse_args()
+
+    # Imports the specified model for the Tetris Game
+    module = importlib.import_module(f'models.{args.file_name}.main')
+    # Initialize the model
+    model = module.Model()
+
+    # Let the games begin
     App = TetrisApp()
     App.run()
