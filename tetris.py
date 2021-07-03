@@ -433,20 +433,18 @@ class TetrisApp(object):
         if type(return_value) == int:
             return_value = [return_value]
         if type(return_value) == list:
-            j = []
+            prev_inputs = set()
             for i in return_value:
-                if j.count(i) == 1:
+                if i in prev_inputs:
                     print("Ignored repetitive keystroke: ", i)
                     continue
-                j.append(i)
-                if i in range(6):
-                    key_actions[code_map[i]]()
-                else:
-                    print(
-                        "the  code: ",
-                        i,
-                        " is not recognized by tetris; command ignored",
-                    )
+                prev_inputs.add(i)
+
+                key_action = code_map.get(i, None)
+                if key_action is None:
+                    print(f'The code: {i} is not recognized by tetris, command ignored.')
+                    continue
+                key_actions[key_action]()
 
 
 if __name__ == "__main__":
