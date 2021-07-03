@@ -58,6 +58,14 @@ from enum import Enum
 # Import Constants
 from constants import tetris_shapes, colors, rotation_offsets
 
+# The configuration
+cell_size = 18
+cols = 10
+rows = 22
+maxfps = 30
+
+code_map = [0, "UP", "DOWN", "LEFT", "RIGHT", "RETURN"]
+
 
 class TimeoutException(Exception):
     """A custom exception for when a model takes too long to make a decision"""
@@ -68,14 +76,6 @@ class Direction(Enum):
     CW = CLOCKWISE = 1
     CCW = COUNTER_CLOCKWISE = 2
 
-
-# The configuration
-cell_size = 18
-cols = 10
-rows = 22
-maxfps = 30
-
-code_map = [0, "UP", "DOWN", "LEFT", "RIGHT", "RETURN"]
 
 
 def rotate_counter_clockwise(shape):
@@ -419,7 +419,7 @@ class TetrisApp(object):
     def interpret(self, return_value):
         # takes a list of commands and interprets them as game movements
         key_actions = {
-            0: lambda: print("No input detected"),
+            0: lambda: 0,
             "ESCAPE": self.quit,
             "LEFT": lambda: self.move(-1),
             "RIGHT": lambda: self.move(+1),

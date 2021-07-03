@@ -3,11 +3,11 @@
 import random
 import time
 
-
-
 class Model:
     def __init__ (self):
         # Have your own "Global" Variables here
+        random.seed(438)
+        self.timing = 0
         pass
 
     def next_move (self):
@@ -32,11 +32,14 @@ class Model:
 
         Usage:
         return [2, 3, 1]
+        return 2
+        return []
         """
 
         # Replace with your AI
+        self.timing += 1
 
-        return random.randint(1,4)
+        return [0]
 
     def get_board_width (self):
         """
@@ -127,7 +130,7 @@ class Model:
         """
         return self.time
 
-    def update_state (self, game_state):
+    def _update_state (self, game_state):
         """
         Updates the model's internal representation of the board.
         The model does not have access to this method, and honestly doesn't need to
