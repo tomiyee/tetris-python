@@ -128,16 +128,23 @@ def new_board():
 
 
 class TetrisApp(object):
-    def __init__(self):
+    def __init__(self, model, debug=False):
+
         pygame.init()
-        self.allotted_time = 200
-        self.overtime = 0
+        self.debug = debug
+        self.model = model
+
+        self.allotted_time = 200 # time in ms
+        self.overtime = 0 
         self.queued_commands = []
         self.total_game_ticks = 0
+
         pygame.key.set_repeat(250, 25)
+
         self.width = cell_size * (cols + 6)
         self.height = cell_size * rows
         self.rlim = cell_size * cols
+
         self.bground_grid = [
             [8 if x % 2 == y % 2 else 0 for x in range(cols)] for y in range(rows)
         ]
@@ -383,18 +390,22 @@ class TetrisApp(object):
                         "current_piece_map": current_piece_map,
                     }
 
-                    model._update_state(internal_state_representation)
+                    self.model._update_state(internal_state_representation)
 
                     start = time.time()
-                    return_value = model.next_move()
+                    return_value = self.model.next_move()
                     elapsed = time.time() - start
                     elapsed *= 1000
+
+                    # If debug is on, do not count the time passed
+                    if self.debug:
+                        elapsed = 0
 
                     if elapsed > self.allotted_time:
                         self.overtime += elapsed - self.allotted_time
                         print(
                             "next_move() function took ",
-                            ceil(elapsed - ir["allotted_time"]),
+                            ceil(elapsed - internal_state_representation["allotted_time"]),
                             "ms over allotted time to complete. "
                             "game simulated ahead to compensate",
                         )
@@ -460,6 +471,13 @@ if __name__ == "__main__":
         help="The name of the module with your tetris AI model. This module should be \n \
     within the `models` directory. An example is given as `ai_rando`.",
     )
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Enable debug mode: The Tetris Engine will wait until input \
+                is received from your Model before updating the frame"
+    )
     args = parser.parse_args()
 
     # Imports the specified model for the Tetris Game
@@ -468,5 +486,5 @@ if __name__ == "__main__":
     model = module.Model()
 
     # Let the games begin
-    App = TetrisApp()
+    App = TetrisApp(model, debug=args.debug)
     App.run()
