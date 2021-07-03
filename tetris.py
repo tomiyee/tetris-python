@@ -445,7 +445,9 @@ if __name__ == '__main__':
 
     # Parse the Arguments
     parser = ArgumentParser()
-    parser.add_argument('-m', '--model', dest='file_name')
+    parser.add_argument('-m', '--model', dest='file_name', help=
+    'The name of the module with your tetris AI model. This module should be \n \
+    within the `models` directory. An example is given as `ai_rando`.');
     args = parser.parse_args()
 
     # Imports the specified model for the Tetris Game
