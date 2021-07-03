@@ -144,6 +144,7 @@ def new_board():
     return board
 
 class TetrisApp(object):
+
     def __init__(self):
         pygame.init()
         self.allotted_time = 200
@@ -171,7 +172,7 @@ class TetrisApp(object):
         self.init_game()
 
     def new_stone(self):
-        self.rotatation_state = 0
+        self.rotation_state = 0
         self.stone_id = self.next_stone_id
         self.stone = self.next_stone[:]
         self.next_stone_id = rand(len(tetris_shapes))
@@ -294,15 +295,15 @@ class TetrisApp(object):
 
         if not self.gameover and not self.paused:
             new_stone = rotate_counter_clockwise(self.stone)
-            dx, dy = rotation_offsets[self.stone_id][self.rotatation_state]
+            dx, dy = rotation_offsets[self.stone_id][self.rotation_state]
 
             self.stone_x += dx
             self.stone_y += dy
             if not check_collision(self.board, new_stone, (self.stone_x, self.stone_y)) and \
                     10 > self.stone_x > 0 and 22 > self.stone_y > 0:
                 self.stone = new_stone
-                self.rotatation_state += 1
-                self.rotatation_state %= 4
+                self.rotation_state += 1
+                self.rotation_state %= 4
             else:
                 self.stone_x -= dx
                 self.stone_y -= dy
@@ -411,7 +412,8 @@ Press space to continue""" % self.score)
 
             dont_burn_my_cpu.tick(maxfps)
 
-    def interpret(self, return_value):  # takes a list of commands and interprets them as game movements
+    def interpret(self, return_value):  
+        # takes a list of commands and interprets them as game movements
         key_actions = {
             0: lambda: print("No input detected"),
             'ESCAPE': self.quit,
