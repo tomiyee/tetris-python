@@ -478,6 +478,7 @@ if __name__ == "__main__":
         dest="file_name",
         help="The name of the module with your tetris AI model. This module should be \n \
     within the `models` directory. An example is given as `ai_rando`.",
+        required = True
     )
     parser.add_argument(
         "-d",
@@ -489,7 +490,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Imports the specified model for the Tetris Game
-    module = importlib.import_module(f"models.{args.file_name}.main")
+    try:
+        module = importlib.import_module(f"models.{args.file_name}.main")
+    except: 
+        raise Exception("[Error] Could not import specified module", args.file_name)
+
     # Initialize the model
     model = module.Model()
 
