@@ -13,6 +13,10 @@ class Model(TetrisBot):
 
     def next_move (self):
         """
+        At every tick, the internal representation of the tetris board state is
+        updated before this `next_move` method is called. You can use all the
+        get methods below
+
         Return an array of numbers denoting moves in a given frame. The tetris program will interpret the moves to the
         best of its ability.
         Alternatively, return a number for a single command.
