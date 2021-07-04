@@ -106,7 +106,7 @@ class TetrisBot():
 
     def get_board_state (self):
         """
-        Will Retrun 2D grid of 0s, 1s,
+        Will Return 2D grid of 0s, 1s,
 
         0 indicates empty space
         1 indicates a locked in piece.
