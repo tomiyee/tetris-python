@@ -47,7 +47,7 @@ if __name__ == "__main__":
         players = args.arena
         player_models = [importlib.import_module(f"models.{player}.main").Model() for player in players]
         for m, p in zip(player_models, players):
-            m.__name = p
+            m._name = p
 
 
         Arena(player_models).run_round_robin()
