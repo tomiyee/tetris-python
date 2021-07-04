@@ -5,10 +5,10 @@ the game.
 
 ```
 pip3 install -r requirements.txt
-python3 tetris.py --model=<name of package>
+python3 app.py --model=<name of package>
 ```
 
-For more information, use the command `python3 tetris.py --help`.
+For more information, use the command `python3 app.py --help`.
 
 ## Adding Your Custom Tetris Bot
 
@@ -19,8 +19,17 @@ random move every game tick.
 In order to create your own Python module, add a directory to `models` with the
 name for your Tetris bot (e.g. `ai_rando`). Within that directory, add two
 Python files: `__init__.py` and `main.py`. The init file can be empty, or have
-other instructions related to initializing your model. The `main.py` file must
-have a `Model` class that inherits from `TetrisBot` available using
+other instructions related to initializing your model. 
+
+```
+tetris-python/
+├── models
+│   ├── ai_rando/
+│   │   ├── __init__.py
+│   │   ├── main.py
+```
+
+The `main.py` file must have a `Model` class that inherits from `TetrisBot` available using
 `from stubs import TetrisBot`. You then override the `next_move()` method and
 the constructor as you would like.
 
@@ -42,7 +51,7 @@ to generate a response in the competitive mode, frames will be skipped. For
 instance, if your model takes the time of 10 frames to come up with an output,
 the Tetris app will render 9 frames as if your Tetris Bot gave no input and
 use the input on the 10th frame. This is to incentivize efficiency in code. This
-timeout feature can be toggled by entering a casual mode.
+timeout feature can be toggled by entering a casual mode (enabling the debug flag).
 
 ### Tetris Game State Methods
 
@@ -50,6 +59,29 @@ Your tetris model has access to a number of methods that grant you access to the
 game state representation. Below list each of the methods that your Tetris Bot
 inherits from the `TetrisBot` class for the purpose of analyzing game state:
 
-| Method | Value |
-| -------|-------|
-| WIP    | WIP   |
+| Method                    | Value |
+|---------------------------|-------|
+|`next_move`                |   -   |              
+|---------------------------|-------|
+|`get_board_width`          |   -   |                    
+|---------------------------|-------|
+|`get_board_height`         |   -   |                     
+|---------------------------|-------|
+|`get_current_piece`        |   -   |                      
+|---------------------------|-------|
+|`get_next_piece`           |   -   |                   
+|---------------------------|-------|
+|`get_current_piece_id`     |   -   |                         
+|---------------------------|-------|
+|`get_next_piece_id`        |   -   |                      
+|---------------------------|-------|
+|`get_current_piece_map`    |   -   |                          
+|---------------------------|-------|
+|`get_current_piece_coord`  |   -   |                            
+|---------------------------|-------|
+|`get_score`                |   -   |              
+|---------------------------|-------|
+|`get_board_state`          |   -   |                    
+|---------------------------|-------|
+|`get_allotted_time`        |   -   |                      
+
