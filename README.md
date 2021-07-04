@@ -13,7 +13,9 @@ For more information, use the command `python3 app.py --help`.
 ## Arena
 Plays a round robin style tournament with specified bots and reports score for each bot
 
+```
 python3 app.py --arena <bot1> <bot2> <bot3> ...
+```
 
 ## Adding Your Custom Tetris Bot
 
