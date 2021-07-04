@@ -51,7 +51,6 @@ import sys
 import time
 from math import ceil
 from argparse import ArgumentParser
-import importlib
 from enum import Enum
 
 
@@ -152,7 +151,8 @@ class TetrisApp(object):
         self.default_font = pygame.font.Font(pygame.font.get_default_font(), 12)
 
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.event.set_blocked(pygame.MOUSEMOTION)  # We do not need
+        pygame.event.set_blocked(pygame.MOUSEMOTION)  
+        # We do not need
         # mouse movement
         # events, so we
         # block them.
@@ -320,7 +320,10 @@ class TetrisApp(object):
             self.init_game()
             self.gameover = False
 
-    def run(self):
+    def run(self, seed=483):
+
+        # Initialize the seed for the blocks
+        np.random.seed(seed)
 
         self.gameover = False
         self.paused = False
@@ -466,38 +469,3 @@ class TetrisApp(object):
 
         return state_representation
 
-if __name__ == "__main__":
-
-    # Initialize the seed for the blocks
-    np.random.seed(438)
-    # Parse the Arguments
-    parser = ArgumentParser()
-    parser.add_argument(
-        "-m",
-        "--model",
-        dest="file_name",
-        help="The name of the module with your tetris AI model. This module should be \n \
-    within the `models` directory. An example is given as `ai_rando`.",
-        required = True
-    )
-    parser.add_argument(
-        "-d",
-        "--debug",
-        action="store_true",
-        help="Enable debug mode: The Tetris Engine will wait until input \
-                is received from your Model before updating the frame"
-    )
-    args = parser.parse_args()
-
-    # Imports the specified model for the Tetris Game
-    try:
-        module = importlib.import_module(f"models.{args.file_name}.main")
-    except: 
-        raise Exception("[Error] Could not import specified module", args.file_name)
-
-    # Initialize the model
-    model = module.Model()
-
-    # Let the games begin
-    App = TetrisApp(model, debug=args.debug)
-    App.run()
