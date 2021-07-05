@@ -125,8 +125,11 @@ def new_board():
 
 
 class TetrisApp(object):
-    def __init__(self, model, debug=False):
+    def __init__(self, model, debug=False, seed=483):
 
+        # Initialize the seed for the blocks
+        np.random.seed(seed)
+        
         pygame.init()
         self.debug = debug
         self.model = model
@@ -147,7 +150,7 @@ class TetrisApp(object):
         self.default_font = pygame.font.Font(pygame.font.get_default_font(), 12)
 
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.event.set_blocked(pygame.MOUSEMOTION)  
+        pygame.event.set_blocked(pygame.MOUSEMOTION)
         # We do not need
         # mouse movement
         # events, so we
@@ -346,10 +349,7 @@ class TetrisApp(object):
         self.draw_matrix(self.stone, (self.stone_x, self.stone_y))
         self.draw_matrix(self.next_stone, (COLS + 1, 2))
 
-    def run(self, seed=483, exit_on_end=False):
-
-        # Initialize the seed for the blocks
-        np.random.seed(seed)
+    def run(self, exit_on_end=False):
 
         self.gameover = False
         self.paused = False
@@ -466,6 +466,8 @@ class TetrisApp(object):
                 current_piece_map[r + self.stone_y][c + self.stone_x] = bool(self.stone[r][c])
         # Builds the Internal Representation
         state_representation = {
+            'rows': ROWS,
+            'cols': COLS,
             "current_piece": [list(map(bool, row)) for row in self.stone],
             "current_piece_id": self.stone_id,
             "next_piece": [list(map(bool, row)) for row in self.next_stone],
@@ -480,4 +482,3 @@ class TetrisApp(object):
         }
 
         return state_representation
-
