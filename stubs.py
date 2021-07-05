@@ -4,6 +4,8 @@ from random import randint
 import time
 
 class TetrisBot():
+    """ The base class that other Tetris Bots must inherit from."""
+
     def next_move (self):
         """
         Return an array of numbers denoting moves in a given frame. The tetris program will interpret the moves to the
@@ -36,13 +38,13 @@ class TetrisBot():
         """
         Returns the number of columns
         """
-        return 10
+        return self.cols
 
     def get_board_height (self):
         """
         Returns the number of rows in the board
         """
-        return 22
+        return self.rows
 
     def get_current_piece (self):
         """
@@ -98,6 +100,26 @@ class TetrisBot():
         """
         return self.coord
 
+    def get_current_piece_orientation (self):
+        """
+        Return the int of the on-board piece's rotation, UP by default.
+
+        See Orientation in tetris.py for the integer mapping:
+          UP: 0
+          RIGHT: 1
+          DOWN: 2
+          LEFT: 3
+        """
+        return self.current_piece_orientation
+
+    def get_next_piece_orientation (self):
+        """ Always returns UP orientation. See Orientation in tetris.py for mapping """
+        return self.next_piece_orientation
+
+    def get_cleared_lines (self):
+        """ Returns the number of lines that were cleared in the previous tick """
+        return self.cleared_lines
+
     def get_score (self):
         """
         Returns an integer value of the current score
@@ -126,13 +148,17 @@ class TetrisBot():
         Updates the model's internal representation of the board.
         The model does not have access to this method, and honestly doesn't need to
         """
-        self.current_piece = game_state["current_piece"]
-        self.current_piece_id = game_state["current_piece_id"]
-        self.next_piece = game_state["next_piece"]
-        self.next_piece_id = game_state["next_piece_id"]
+        self.rows = game_state['rows']
+        self.cols = game_state['cols']
+        self.current_piece = game_state['current_piece']
+        self.current_piece_id = game_state['current_piece_id']
+        self.current_piece_orientation = game_state['current_piece_orientation']
+        self.next_piece = game_state['next_piece']
+        self.next_piece_id = game_state['next_piece_id']
+        self.next_piece_orientation = game_state['next_piece_orientation']
+        self.cleared_lines = game_state['cleared_lines']
         self.score = game_state["score"]
         self.time = game_state["allotted_time"]
         self.board = game_state["current_board"]
         self.coord = game_state["position"]
         self.current_piece_map = game_state["current_piece_map"]
-        pass
