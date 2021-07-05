@@ -3,13 +3,12 @@
 import random
 import time
 from stubs import TetrisBot
+random = random.Random() # Ensures Arena (running in multiple threads) have same seed
 
 class Model(TetrisBot):
     def __init__ (self):
         # Have your own "Global" Variables here
         random.seed(438)
-        self.timing = 0
-
 
     def next_move (self):
         """
@@ -42,7 +41,4 @@ class Model(TetrisBot):
         """
 
         # Replace with your AI
-        self.timing += 1
-
-        time.sleep(.2)
-        return [1]
+        return [random.randint(0, 4)]
