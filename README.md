@@ -26,7 +26,7 @@ random move every game tick.
 In order to create your own Python module, add a directory to `models` with the
 name for your Tetris bot (e.g. `ai_rando`). Within that directory, add two
 Python files: `__init__.py` and `main.py`. The init file can be empty, or have
-other instructions related to initializing your model. 
+other instructions related to initializing your model.
 
 ```
 tetris-python/
@@ -66,18 +66,32 @@ Your tetris model has access to a number of methods that grant you access to the
 game state representation. Below list each of the methods that your Tetris Bot
 inherits from the `TetrisBot` class for the purpose of analyzing game state:
 
-| Method                      | Value |
-|-----------------------------|-------|
-|`next_move()`                |   -   |              
-|`get_board_width()`          |   -   |                    
-|`get_board_height()`         |   -   |                     
-|`get_current_piece()`        |   -   |                      
-|`get_next_piece()`           |   -   |                   
-|`get_current_piece_id()`     |   -   |                         
-|`get_next_piece_id()`        |   -   |                      
-|`get_current_piece_map()`    |   -   |                          
-|`get_current_piece_coord()`  |   -   |                            
-|`get_score()`                |   -   |              
-|`get_board_state()`          |   -   |                    
-|`get_allotted_time()`        |   -   |                      
+| Method                          | Value                                                                     |
+|---------------------------------|---------------------------------------------------------------------------|    
+|`get_board_width()`              | The number of cols of the board                                           |
+|`get_board_height()`             | The number of rows of the board                                           |
+|`get_current_piece()`            | A 2D array for the on-board tetris piece, with rotation                   |
+|`get_next_piece()`               | A 2D array for the up-coming tetris piece, with rotation                  |
+|`get_current_piece_id()`         | The int ID of the on-board piece, without rotation                        |
+|`get_next_piece_id()`            | The int ID of the up-coming piece, without rotation                       |
+|`get_current_piece_orientation()`| The int of the on-board piece's rotation, UP for default                  |
+|`get_next_piece_orientation()`   | The int of the up-coming piece's rotation, UP always                      |
+|`get_current_piece_map()`        | A 2D array spanning the entire board containing the current piece         |
+|`get_current_piece_coord()`      | A tuple of (row, col) of the top left spot of the matrix                  |   
+|`get_cleared_lines()`            | The number of lines cleared in the previous game tick                     |
+|`get_score()`                    | The current score shown on screen                                         |
+|`get_board_state()`              | A 2D array of the current board without the current piece                 |
+|`get_allotted_time()`            | The amount of time in ms that your bot has to compute in competitive mode |
 
+
+### Random Number Generator
+
+Note, to make a reliable number generator that is consistent even in arena mode
+(which uses multi-threading), you can create separate instances of random.Random
+for each thread.
+
+```
+local_random = random.Random()
+local_random.seed(1234)
+local_random.randint(1,100) # same int for different threads
+```
