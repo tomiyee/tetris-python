@@ -315,16 +315,17 @@ class TetrisApp(object):
         if self.gameover or self.paused:
             return False
 
+        # TODO - set the rotation offsets to a more reasonable permutation
+
         # generate a matrix with the rotated the stone
         if dir == Direction.COUNTER_CLOCKWISE:
             new_stone = rotate_counter_clockwise(self.stone)
-            new_rotation_state = (self.rotation_state - 1) % 4
+            new_rotation_state = (self.rotation_state + 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][self.rotation_state]
         if dir == Direction.CLOCKWISE:
             new_stone = rotate_clockwise(self.stone)
-            new_rotation_state = (self.rotation_state + 1) % 4
-
-        # Determine the
-        dx, dy = rotation_offsets[self.stone_id][new_rotation_state]
+            new_rotation_state = (self.rotation_state - 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][(self.rotation_state-2)%4]
 
         self.stone_x += dx
         self.stone_y += dy
