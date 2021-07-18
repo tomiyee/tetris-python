@@ -439,7 +439,7 @@ class TetrisApp(object):
             bot_inputs = [bot_inputs]
 
         if type(bot_inputs) != list:
-            return;
+            return
 
         prev_inputs = set()
         for i in bot_inputs:
