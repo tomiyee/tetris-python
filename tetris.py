@@ -75,9 +75,16 @@ class Direction(Enum):
     CW = CLOCKWISE = 1
     CCW = COUNTER_CLOCKWISE = 2
 
-
+# The default orientation of all pieces is UP
+Orientation = {
+    'UP': 0,
+    'RIGHT': 1,
+    'DOWN': 2,
+    'LEFT': 3
+}
 
 def rotate_counter_clockwise(shape):
+    """Given a shape, rotates it counter clockwise"""
     return [
         [shape[y][x] for y in range(len(shape))]
         for x in range(len(shape[0]) - 1, -1, -1)
@@ -85,7 +92,7 @@ def rotate_counter_clockwise(shape):
 
 
 def rotate_clockwise(shape):
-    """Given a shape, rotates it counter clockwise"""
+    """ Given a shape, rotates it clockwise """
     shape = rotate_counter_clockwise(shape)
     shape = rotate_counter_clockwise(shape)
     shape = rotate_counter_clockwise(shape)
@@ -119,13 +126,20 @@ def join_matrixes(mat1, mat2, mat2_off):
 
 
 def new_board():
+    """
+    Returns a 2D array ( ROWS+1 x COLS ). The top ROWS x COLS are empty (0), and
+    the bottom row is marked full (1) for purposes of collision detection
+    """
     board = [[0 for x in range(COLS)] for y in range(ROWS)]
     board += [[1 for x in range(COLS)]]
     return board
 
 
 class TetrisApp(object):
-    def __init__(self, model, debug=False):
+    def __init__(self, model, debug=False, seed=483):
+
+        # Initialize the seed for the blocks
+        np.random.seed(seed)
 
         pygame.init()
         self.debug = debug
@@ -143,23 +157,33 @@ class TetrisApp(object):
         self.bground_grid = [
             [8 if x % 2 == y % 2 else 0 for x in range(COLS)] for y in range(ROWS)
         ]
-
         self.default_font = pygame.font.Font(pygame.font.get_default_font(), 12)
-
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.event.set_blocked(pygame.MOUSEMOTION)  
-        # We do not need
-        # mouse movement
-        # events, so we
-        # block them.
+        # We do not need mouse movement events, so we block them.
+        pygame.event.set_blocked(pygame.MOUSEMOTION)
 
         self.next_stone_id = randint(len(tetris_shapes))
-
         self.next_stone = tetris_shapes[self.next_stone_id]
+        # The number of lines cleared in the previous game tick
+        self.cleared_lines = 0
         self.init_game()
 
+    def restart_game(self):
+        """Initializes a new game only if the game is not currently running"""
+        if self.gameover:
+            self.init_game()
+            self.gameover = False
+
+    def init_game(self):
+        self.board = new_board()
+        self.new_stone()
+        self.level = 1
+        self.score = 0
+        self.lines = 0
+        pygame.time.set_timer(pygame.USEREVENT + 1, 1000)
+
     def new_stone(self):
-        self.rotation_state = 0
+        self.rotation_state = Orientation['UP']
         self.stone_id = self.next_stone_id
         self.stone = self.next_stone[:]
         self.next_stone_id = randint(len(tetris_shapes))
@@ -169,14 +193,6 @@ class TetrisApp(object):
 
         if check_collision(self.board, self.stone, (self.stone_x, self.stone_y)):
             self.gameover = True
-
-    def init_game(self):
-        self.board = new_board()
-        self.new_stone()
-        self.level = 1
-        self.score = 0
-        self.lines = 0
-        pygame.time.set_timer(pygame.USEREVENT + 1, 1000)
 
     def disp_msg(self, msg, topleft):
         x, y = topleft
@@ -250,13 +266,6 @@ class TetrisApp(object):
         if not check_collision(self.board, self.stone, (new_x, self.stone_y)):
             self.stone_x = new_x
 
-    def quit(self):
-        """ Closes the window """
-        print("[+] Done!")
-        self.center_msg("Exiting...")
-        pygame.display.update()
-        pygame.quit()
-
     def drop(self, manual=False):
         """
         The current stone moves down by one row. If manual, the player moved
@@ -283,6 +292,9 @@ class TetrisApp(object):
                         break
                 else:
                     break
+
+            self.cleared_lines = cleared_ROWS
+
             self.add_cl_lines(cleared_ROWS)
             return True
 
@@ -302,9 +314,18 @@ class TetrisApp(object):
         # Don't continue if the game is over or paused
         if self.gameover or self.paused:
             return False
+
+        # TODO - set the rotation offsets to a more reasonable permutation
+
+        # generate a matrix with the rotated the stone
         if dir == Direction.COUNTER_CLOCKWISE:
             new_stone = rotate_counter_clockwise(self.stone)
-        dx, dy = rotation_offsets[self.stone_id][self.rotation_state]
+            new_rotation_state = (self.rotation_state + 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][self.rotation_state]
+        if dir == Direction.CLOCKWISE:
+            new_stone = rotate_clockwise(self.stone)
+            new_rotation_state = (self.rotation_state - 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][(self.rotation_state-2)%4]
 
         self.stone_x += dx
         self.stone_y += dy
@@ -313,7 +334,8 @@ class TetrisApp(object):
 
         if not collided and COLS > self.stone_x > 0 and ROWS > self.stone_y > 0:
             self.stone = new_stone
-            self.rotation_state = (self.rotation_state + 1) % 4
+            self.rotation_state = new_rotation_state
+        # If new rotation leads to collision, move it back, no commits
         else:
             self.stone_x -= dx
             self.stone_y -= dy
@@ -321,12 +343,12 @@ class TetrisApp(object):
     def toggle_pause(self):
         self.paused = not self.paused
 
-    def start_game(self):
-        """Initializes a new game only if the game is not currently running"""
-        if self.gameover:
-            self.init_game()
-            self.gameover = False
-
+    def quit(self):
+        """ Closes the window """
+        print("[+] Done!")
+        self.center_msg("Exiting...")
+        pygame.display.update()
+        pygame.quit()
 
     def render(self):
 
@@ -346,10 +368,7 @@ class TetrisApp(object):
         self.draw_matrix(self.stone, (self.stone_x, self.stone_y))
         self.draw_matrix(self.next_stone, (COLS + 1, 2))
 
-    def run(self, seed=483, exit_on_end=False):
-
-        # Initialize the seed for the blocks
-        np.random.seed(seed)
+    def run(self, exit_on_end=False):
 
         self.gameover = False
         self.paused = False
@@ -367,6 +386,7 @@ class TetrisApp(object):
                 self.render()
 
             pygame.display.update()
+
             if not self.gameover:
                 self.total_game_ticks += 1
 
@@ -381,14 +401,18 @@ class TetrisApp(object):
                         self.interpret(self.queued_commands)
                         self.queued_commands = []
                 else:
+                    # Send the model the current state of the tetris board
                     state_representation = self._build_state_representation()
-
                     self.model._update_state(state_representation)
 
+                    # Determine the duration of time that the model takes
                     start = time.time()
                     return_value = self.model.next_move()
                     elapsed = time.time() - start
                     elapsed *= 1000
+
+                    # Reset the number of cleared lines
+                    self.cleared_lines = 0
 
                     # If debug is on, do not count the time passed
                     if self.debug:
@@ -431,7 +455,7 @@ class TetrisApp(object):
             "DOWN": lambda: self.drop(True),
             "UP": self.rotate_stone,
             "p": self.toggle_pause,
-            "SPACE": self.start_game,
+            "SPACE": self.restart_game,
             "RETURN": self.insta_drop,
         }
 
@@ -453,6 +477,7 @@ class TetrisApp(object):
                 print(f'The code: {i} is not recognized by tetris, command ignored.')
                 continue
             key_actions[key_action]()
+
     def _build_state_representation(self):
         """
         Constructs a dict containing properties of the current game state to send
@@ -466,10 +491,15 @@ class TetrisApp(object):
                 current_piece_map[r + self.stone_y][c + self.stone_x] = bool(self.stone[r][c])
         # Builds the Internal Representation
         state_representation = {
+            'rows': ROWS,
+            'cols': COLS,
             "current_piece": [list(map(bool, row)) for row in self.stone],
             "current_piece_id": self.stone_id,
+            'current_piece_orientation': self.rotation_state,
             "next_piece": [list(map(bool, row)) for row in self.next_stone],
             "next_piece_id": self.next_stone_id,
+            'next_piece_orientation': Orientation['UP'],
+            'cleared_lines': self.cleared_lines,
             "score": self.score,
             "allotted_time": self.allotted_time,
             "current_board": [
@@ -480,4 +510,3 @@ class TetrisApp(object):
         }
 
         return state_representation
-

@@ -9,9 +9,9 @@ class Arena():
         self.player_pairs = combinations(players, 2)
 
     def run_game(self, player, seed=10000):
-        App = TetrisApp(player)
-        score = App.run(seed=seed)
-        return score 
+        App = TetrisApp(player, seed=seed)
+        score = App.run()
+        return score
 
     def run_round_robin(self, seed = 1000):
         for a, b in self.player_pairs:
@@ -19,4 +19,4 @@ class Arena():
                 scores = p.starmap(self.run_game, [(a,seed), (b,seed)])
                 print(f"Player Score: {a._name} - {scores[0]}")
                 print(f"Player Score: {b._name} - {scores[1]}")
-        print("[+] Completed Round Robin") 
+        print("[+] Completed Round Robin")
