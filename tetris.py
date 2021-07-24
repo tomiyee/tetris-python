@@ -447,8 +447,6 @@ class TetrisApp(object):
                 self.quit()
                 return self.score
 
-            print(self.gameover, self.debug)
-
             dont_burn_my_cpu.tick(MAX_FPS)
 
     def interpret(self, bot_inputs):
