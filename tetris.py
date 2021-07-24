@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 # NOTE FOR WINDOWS USERS:
@@ -242,11 +241,11 @@ class TetrisApp(object):
         linescores = [0, 40, 100, 300, 1200]
         self.lines += n
         self.score += linescores[n] * self.level
-        if self.lines >= self.level * 6:
-            self.level += 1
-            newdelay = 1000 - 50 * (self.level - 1)
-            newdelay = 100 if newdelay < 100 else newdelay
-            pygame.time.set_timer(pygame.USEREVENT + 1, newdelay)
+        # if self.lines >= self.level * 6:
+            # self.level += 1
+            # newdelay = 1000 - 50 * (self.level - 1)
+            # newdelay = 100 if newdelay < 100 else newdelay
+            # pygame.time.set_timer(pygame.USEREVENT + 1, newdelay)
 
     def move(self, delta_x):
         """ Moves the current stone horizontally (no vertical movement) """
@@ -315,16 +314,17 @@ class TetrisApp(object):
         if self.gameover or self.paused:
             return False
 
+        # TODO - set the rotation offsets to a more reasonable permutation
+
         # generate a matrix with the rotated the stone
         if dir == Direction.COUNTER_CLOCKWISE:
             new_stone = rotate_counter_clockwise(self.stone)
-            new_rotation_state = (self.rotation_state - 1) % 4
+            new_rotation_state = (self.rotation_state + 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][self.rotation_state]
         if dir == Direction.CLOCKWISE:
             new_stone = rotate_clockwise(self.stone)
-            new_rotation_state = (self.rotation_state + 1) % 4
-
-        # Determine the
-        dx, dy = rotation_offsets[self.stone_id][new_rotation_state]
+            new_rotation_state = (self.rotation_state - 1) % 4
+            dx, dy = rotation_offsets[self.stone_id][(self.rotation_state-2)%4]
 
         self.stone_x += dx
         self.stone_y += dy
@@ -389,8 +389,9 @@ class TetrisApp(object):
             if not self.gameover:
                 self.total_game_ticks += 1
 
-                if self.total_game_ticks % 100 == 0:
-                    self.allotted_time -= 5
+                
+                # if self.total_game_ticks % 100 == 0:
+                    # self.allotted_time -= 5
 
                 if self.overtime > 0:  # if the code was timed out
                     self.overtime = max(0, self.overtime - self.allotted_time)
@@ -442,6 +443,10 @@ class TetrisApp(object):
             if self.total_game_ticks % 5 == 0:
                 self.drop(False)
 
+            if self.gameover and self.debug:
+                self.quit()
+                return self.score
+
             dont_burn_my_cpu.tick(MAX_FPS)
 
     def interpret(self, bot_inputs):
@@ -462,7 +467,7 @@ class TetrisApp(object):
             bot_inputs = [bot_inputs]
 
         if type(bot_inputs) != list:
-            return;
+            return
 
         prev_inputs = set()
         for i in bot_inputs:
@@ -492,17 +497,17 @@ class TetrisApp(object):
         state_representation = {
             'rows': ROWS,
             'cols': COLS,
-            "current_piece": [list(map(bool, row)) for row in self.stone],
+            "current_piece": [list(map(int,map(bool, row))) for row in self.stone],
             "current_piece_id": self.stone_id,
             'current_piece_orientation': self.rotation_state,
-            "next_piece": [list(map(bool, row)) for row in self.next_stone],
+            "next_piece": [list(map(int,map(bool, row))) for row in self.next_stone],
             "next_piece_id": self.next_stone_id,
             'next_piece_orientation': Orientation['UP'],
             'cleared_lines': self.cleared_lines,
             "score": self.score,
             "allotted_time": self.allotted_time,
             "current_board": [
-                list(map(bool, row)) for row in self.board[:-1]
+                list(map(int,map(bool, row))) for row in self.board[:-1]
             ],
             "position": (self.stone_y, self.stone_x),
             "current_piece_map": current_piece_map,

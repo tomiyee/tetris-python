@@ -36,6 +36,7 @@ if __name__ == "__main__":
         help='The seed for the random number generator. Affects block generation'
     )
     args = parser.parse_args()
+    args.seed = int(args.seed)
 
     if args.model:
 
@@ -59,6 +60,6 @@ if __name__ == "__main__":
             m._name = p
 
 
-        Arena(player_models).run_round_robin(seed=args.seed)
+        Arena(player_models, debug = args.debug).run_round_robin(seed=args.seed)
 
     print("Nothing else to do.")
