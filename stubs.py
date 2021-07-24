@@ -2,6 +2,7 @@
 # Generates a random number from [0, n)
 from random import randint
 import time
+import importlib
 
 class TetrisBot():
     """ The base class that other Tetris Bots must inherit from."""
@@ -162,3 +163,17 @@ class TetrisBot():
         self.board = game_state["current_board"]
         self.coord = game_state["position"]
         self.current_piece_map = game_state["current_piece_map"]
+
+def import_player( player ):
+    # Imports the specified model for the Tetris Game
+    try:
+        module = importlib.import_module(f"models.{player}.main")
+    except:
+        raise Exception("[Error] Could not import specified module", player)
+
+    # Initialize the model
+    model = module.Model()
+    model._name = player
+    return model
+
+
