@@ -3,14 +3,13 @@ from arena import Arena
 from argparse import ArgumentParser
 import importlib
 from tetris import TetrisApp
+from stubs import import_player
 
 if __name__ == "__main__":
 
     # Parse the Arguments
     parser = ArgumentParser()
-    parser.add_argument(
-        "-a",
-        "--arena",
+    parser.add_argument( "-a", "--arena",
         nargs='+',
         help="Use several players in arena",
     )
@@ -40,26 +39,14 @@ if __name__ == "__main__":
 
     if args.model:
 
-        # Imports the specified model for the Tetris Game
-        try:
-            module = importlib.import_module(f"models.{args.model}.main")
-        except:
-            raise Exception("[Error] Could not import specified module", args.model)
-
-        # Initialize the model
-        model = module.Model()
-
+        model = import_player(args.model)
         # Let the games begin
         App = TetrisApp(model, debug=args.debug, seed=args.seed)
         App.run()
 
     if args.arena:
         players = args.arena
-        player_models = [importlib.import_module(f"models.{player}.main").Model() for player in players]
-        for m, p in zip(player_models, players):
-            m._name = p
-
-
+        player_models = [import_player(player) for player in players]
         Arena(player_models, debug = args.debug).run_round_robin(seed=args.seed)
 
     print("Nothing else to do.")

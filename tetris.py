@@ -136,6 +136,7 @@ def new_board():
 
 class TetrisApp(object):
     def __init__(self, model, debug=False, seed=483):
+        if type(model) == str: model = import_player(model)
 
         # Initialize the seed for the blocks
         np.random.seed(seed)

@@ -1,6 +1,7 @@
 from itertools import combinations
 from multiprocessing import Pool
 from tetris import TetrisApp
+from stubs import import_player
 
 class Arena():
 
@@ -10,6 +11,7 @@ class Arena():
         self.player_pairs = combinations(players, 2)
 
     def run_game(self, player, seed=10000, debug=False):
+
         App = TetrisApp(player, seed=seed, debug=debug)
         score = App.run()
         return score
