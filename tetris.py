@@ -52,6 +52,7 @@ from argparse import ArgumentParser
 with contextlib.redirect_stdout(None):
     import pygame  # silences pygame's message
 
+from stubs import import_player
 # Import Constants
 from constants import tetris_shapes, colors, rotation_offsets
 

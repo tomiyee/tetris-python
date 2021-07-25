@@ -42,7 +42,7 @@ if __name__ == "__main__":
         model = import_player(args.model)
         # Let the games begin
         App = TetrisApp(model, debug=args.debug, seed=args.seed)
-        App.run()
+        
 
     if args.arena:
         players = args.arena
