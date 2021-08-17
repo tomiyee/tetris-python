@@ -34,6 +34,7 @@ if __name__ == "__main__":
         default=69,
         help='The seed for the random number generator. Affects block generation'
     )
+
     args = parser.parse_args()
     args.seed = int(args.seed)
 

@@ -8,11 +8,10 @@ from itertools import count
 from PIL import Image
 
 
+Transition = namedtuple("Transition", ("state", "action", "next_state", "reward"))
 
-Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
 
-class ReplayMemory():
-
+class ReplayMemory:
     def __init__(self, capacity):
         self.memory = deque([], maxlen=capacity)
 
@@ -25,5 +24,3 @@ class ReplayMemory():
 
     def __len__(self):
         return len(self.memory)
-
-
